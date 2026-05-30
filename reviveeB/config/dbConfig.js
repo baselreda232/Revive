@@ -1,13 +1,12 @@
-//import modules
-require("dotenv").config();
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
-	try {
-		await mongoose.connect(process.env.DATABASE_URI);
-	} catch (err) {
-		console.log(err);
+	if (!process.env.DATABASE_URI) {
+		throw new Error("DATABASE_URI is required");
 	}
+
+	await mongoose.connect(process.env.DATABASE_URI);
+	console.log("Connected to MongoDB");
 };
 
 module.exports = connectDB;

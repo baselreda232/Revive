@@ -1,13 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
-const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const connectDB = require("./config/dbConfig");
-const PORT = process.env.PORT;
-
-//calling the function
-connectDB();
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cookieParser())
@@ -19,19 +16,30 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+app.get("/", (req, res) => {
+  res.json({ status: "ok", service: "Revive API" });
+});
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 // Import routes
 app.use("/customer", require("./routes/customerRoute"));
 app.use("/inspector", require("./routes/inspectorRoute"));
 app.use("/product", require("./routes/productRoute"));
 app.use("/admin", require("./routes/adminRoute"));
 
-//connecting DB and handling port
-mongoose.connection.once("open", () => {
-  console.log("Connected to MongoDB");
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-});
-mongoose.connection.on("error", (err) => {
-  console.log(err);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("Failed to start server:", err.message);
+    process.exit(1);
+  }
+};
+
+startServer();
